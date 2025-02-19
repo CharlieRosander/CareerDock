@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+alembic
+python-jose
+passlib
+python-multipart
+pydantic
+pydantic-settings
+python-dotenv
+google-auth-oauthlib
+google-auth
+requests

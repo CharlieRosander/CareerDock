@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - CareerDock{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row min-vh-75 align-items-center">
+        <div class="col-md-6 text-center text-md-start">
+            <h1 class="display-4 fw-bold mb-4">
+                Your Intelligent Job Application Assistant
+            </h1>
+            <p class="lead mb-5">
+                CareerDock helps you manage your job applications smarter, not harder. Organize, track, and optimize your job search journey with AI-powered insights.
+            </p>
+            
+            <a href="/auth/login" class="btn btn-primary btn-lg">
+                <img src="{{ url_for('static', path='images/google-48.svg') }}" alt="Google" class="me-2" style="height: 35px; padding-bottom: 5px;">
+                Get Started with Google
+            </a>
+        </div>
+        <div class="col-md-6 d-none d-md-block text-center">
+            <img src="{{ url_for('static', path='images/undraw_to-do-list.svg') }}" alt="CareerDock Hero" class="img-fluid" style="max-width: 80%;">
+        </div>
+    </div>
+
+    <div class="row mt-5 pt-5">
+        <div class="col-12 text-center">
+            <h2 class="mb-5">Why CareerDock?</h2>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h3 class="h5 mb-3">Smart Organization</h3>
+                    <p class="text-muted">Keep all your job applications, emails, and documents in one place, intelligently organized.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h3 class="h5 mb-3">AI-Powered Insights</h3>
+                    <p class="text-muted">Get personalized suggestions and insights to improve your applications and increase your chances.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h3 class="h5 mb-3">Gmail Integration</h3>
+                    <p class="text-muted">Seamlessly manage your job-related emails and communications right from CareerDock.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
