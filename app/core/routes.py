@@ -22,3 +22,15 @@ async def dashboard(
         "dashboard.html",
         {"request": request, "user": current_user}
     )
+
+@router.get("/jobs")
+async def job_registry(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    """Job registry page that requires login"""
+    return templates.TemplateResponse(
+        "job_registry.html",
+        {"request": request, "user": current_user}
+    )
