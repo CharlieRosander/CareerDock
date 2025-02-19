@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.models.credentials import UserCredentials
+from app.core.auth.models import UserCredentials
 from datetime import datetime
 from cryptography.fernet import Fernet
 import os

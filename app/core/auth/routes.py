@@ -16,9 +16,9 @@ from datetime import datetime, timedelta
 # OBS - Tillåt OAuth över HTTP i utveckling
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
-from app.database import get_db
-from app.crud.user import get_user_by_google_id, create_user, get_user_by_email
-from app.crud.credentials import save_user_credentials
+from app.core.database import get_db
+from .service import get_user_by_google_id, create_user, get_user_by_email
+from .credentials import save_user_credentials
 
 # Ladda miljövariabler
 load_dotenv()

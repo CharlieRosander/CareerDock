@@ -12,17 +12,14 @@ DB_USER = os.getenv("POSTGRES_USER")
 DB_PASSWORD = os.getenv("POSTGRES_PASSWORD")
 DB_NAME = os.getenv("POSTGRES_DB")
 
-SQLALCHEMY_DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@localhost:5432/{DB_NAME}"
+SQLALCHEMY_DATABASE_URL = (
+    f"postgresql://{DB_USER}:{DB_PASSWORD}@localhost:5432/{DB_NAME}"
+)
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-# Import all models here so Alembic can discover them
-from app.models.user import User
-from app.models.credentials import UserCredentials
-
-# Dependency to get DB session
 def get_db():
     db = SessionLocal()
     try:
