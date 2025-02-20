@@ -3,79 +3,267 @@
     <div class="card-body">
         <form hx-post="/api/v1/jobs{% if job %}/{{ job.id }}{% endif %}"
               hx-target="#job-list"
-              hx-swap="innerHTML">
+              hx-swap="innerHTML"
+              hx-indicator="#loading">
             
-            <!-- Title -->
-            <div class="mb-3">
-                <label for="title" class="form-label">Job Title</label>
-                <input type="text" 
-                       class="form-control"
-                       name="title" 
-                       id="title"
-                       value="{{ job.title if job else '' }}"
-                       required>
+            <div class="row">
+                <!-- Left Column -->
+                <div class="col-md-6">
+                    <h5 class="card-title mb-4">Basic Information</h5>
+                    <!-- Title -->
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Job Title</label>
+                        <input type="text" 
+                               class="form-control"
+                               name="title" 
+                               id="title"
+                               value="{{ job.title if job else '' }}"
+                               required>
+                    </div>
+                    
+                    <!-- Company -->
+                    <div class="mb-3">
+                        <label for="company" class="form-label">Company</label>
+                        <input type="text" 
+                               class="form-control"
+                               name="company" 
+                               id="company"
+                               value="{{ job.company if job else '' }}"
+                               required>
+                    </div>
+
+                    <!-- Location -->
+                    <div class="mb-3">
+                        <label for="location" class="form-label">Location</label>
+                        <input type="text" 
+                               class="form-control"
+                               name="location" 
+                               id="location"
+                               value="{{ job.location if job else '' }}">
+                    </div>
+
+                    <!-- Job Type -->
+                    <div class="mb-3">
+                        <label for="job_type" class="form-label">Job Type</label>
+                        <select class="form-select"
+                                name="job_type" 
+                                id="job_type">
+                            <option value="">Select job type...</option>
+                            <option value="full-time" {% if job and job.job_type == 'full-time' %}selected{% endif %}>Full-time</option>
+                            <option value="part-time" {% if job and job.job_type == 'part-time' %}selected{% endif %}>Part-time</option>
+                            <option value="contract" {% if job and job.job_type == 'contract' %}selected{% endif %}>Contract</option>
+                            <option value="internship" {% if job and job.job_type == 'internship' %}selected{% endif %}>Internship</option>
+                        </select>
+                    </div>
+
+                    <!-- Industry -->
+                    <div class="mb-3">
+                        <label for="industry" class="form-label">Industry</label>
+                        <select class="form-select"
+                                name="industry" 
+                                id="industry">
+                            <option value="">Select industry...</option>
+                            <option value="tech" {% if job and job.industry == 'tech' %}selected{% endif %}>Technology</option>
+                            <option value="finance" {% if job and job.industry == 'finance' %}selected{% endif %}>Finance</option>
+                            <option value="healthcare" {% if job and job.industry == 'healthcare' %}selected{% endif %}>Healthcare</option>
+                            <option value="education" {% if job and job.industry == 'education' %}selected{% endif %}>Education</option>
+                            <option value="other" {% if job and job.industry == 'other' %}selected{% endif %}>Other</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Description -->
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control"
+                                  name="description" 
+                                  id="description"
+                                  rows="3">{{ job.description if job else '' }}</textarea>
+                    </div>
+
+                    <h5 class="card-title mb-4 mt-5">Application Details</h5>
+                    <!-- Status -->
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select"
+                                name="status" 
+                                id="status"
+                                required>
+                            <option value="">Select status...</option>
+                            <option value="saved" {% if job and job.status == 'saved' %}selected{% endif %}>Saved</option>
+                            <option value="applied" {% if job and job.status == 'applied' %}selected{% endif %}>Applied</option>
+                            <option value="interviewing" {% if job and job.status == 'interviewing' %}selected{% endif %}>Interviewing</option>
+                            <option value="offered" {% if job and job.status == 'offered' %}selected{% endif %}>Offered</option>
+                            <option value="rejected" {% if job and job.status == 'rejected' %}selected{% endif %}>Rejected</option>
+                            <option value="accepted" {% if job and job.status == 'accepted' %}selected{% endif %}>Accepted</option>
+                            <option value="declined" {% if job and job.status == 'declined' %}selected{% endif %}>Declined</option>
+                        </select>
+                    </div>
+
+                    <!-- Application Method -->
+                    <div class="mb-3">
+                        <label for="application_method" class="form-label">Application Method</label>
+                        <select class="form-select"
+                                name="application_method" 
+                                id="application_method">
+                            <option value="">Select method...</option>
+                            <option value="email" {% if job and job.application_method == 'email' %}selected{% endif %}>Email</option>
+                            <option value="website" {% if job and job.application_method == 'website' %}selected{% endif %}>Company Website</option>
+                            <option value="linkedin" {% if job and job.application_method == 'linkedin' %}selected{% endif %}>LinkedIn</option>
+                            <option value="indeed" {% if job and job.application_method == 'indeed' %}selected{% endif %}>Indeed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="col-md-6">
+                    <!-- Application URL -->
+                    <div class="mb-3">
+                        <label for="application_url" class="form-label">Application URL</label>
+                        <input type="url" 
+                               class="form-control"
+                               name="application_url" 
+                               id="application_url"
+                               value="{{ job.application_url if job else '' }}">
+                    </div>
+
+                    <!-- Application Date -->
+                    <div class="mb-3">
+                        <label for="application_date" class="form-label">Application Date</label>
+                        <input type="datetime-local" 
+                               class="form-control"
+                               name="application_date" 
+                               id="application_date"
+                               value="{{ job.application_date.strftime('%Y-%m-%dT%H:%M') if job and job.application_date else '' }}"
+                               required>
+                    </div>
+
+                    <!-- Salary Range -->
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="salary_min" class="form-label">Min Salary</label>
+                                <input type="number" 
+                                       class="form-control"
+                                       name="salary_min" 
+                                       id="salary_min"
+                                       step="1000"
+                                       value="{{ job.salary_min if job else '' }}">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="salary_max" class="form-label">Max Salary</label>
+                                <input type="number" 
+                                       class="form-control"
+                                       name="salary_max" 
+                                       id="salary_max"
+                                       step="1000"
+                                       value="{{ job.salary_max if job else '' }}">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="salary_currency" class="form-label">Currency</label>
+                                <select class="form-select"
+                                        name="salary_currency" 
+                                        id="salary_currency">
+                                    <option value="SEK" {% if not job or job.salary_currency == 'SEK' %}selected{% endif %}>SEK</option>
+                                    <option value="USD" {% if job and job.salary_currency == 'USD' %}selected{% endif %}>USD</option>
+                                    <option value="EUR" {% if job and job.salary_currency == 'EUR' %}selected{% endif %}>EUR</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="card-title mb-4 mt-5">Contact Information</h5>
+                    <!-- Contact Name -->
+                    <div class="mb-3">
+                        <label for="contact_name" class="form-label">Contact Name</label>
+                        <input type="text" 
+                               class="form-control"
+                               name="contact_name" 
+                               id="contact_name"
+                               value="{{ job.contact_name if job else '' }}">
+                    </div>
+
+                    <!-- Contact Email -->
+                    <div class="mb-3">
+                        <label for="contact_email" class="form-label">Contact Email</label>
+                        <input type="email" 
+                               class="form-control"
+                               name="contact_email" 
+                               id="contact_email"
+                               value="{{ job.contact_email if job else '' }}">
+                    </div>
+
+                    <!-- Contact Phone -->
+                    <div class="mb-3">
+                        <label for="contact_phone" class="form-label">Contact Phone</label>
+                        <input type="tel" 
+                               class="form-control"
+                               name="contact_phone" 
+                               id="contact_phone"
+                               value="{{ job.contact_phone if job else '' }}">
+                    </div>
+
+                    <h5 class="card-title mb-4 mt-5">Follow-up Information</h5>
+                    <!-- Next Follow-up -->
+                    <div class="mb-3">
+                        <label for="next_follow_up" class="form-label">Next Follow-up Date</label>
+                        <input type="datetime-local" 
+                               class="form-control"
+                               name="next_follow_up" 
+                               id="next_follow_up"
+                               value="{{ job.next_follow_up.strftime('%Y-%m-%dT%H:%M') if job and job.next_follow_up else '' }}">
+                    </div>
+
+                    <!-- Last Response -->
+                    <div class="mb-3">
+                        <label for="last_response_date" class="form-label">Last Response Date</label>
+                        <input type="datetime-local" 
+                               class="form-control"
+                               name="last_response_date" 
+                               id="last_response_date"
+                               value="{{ job.last_response_date.strftime('%Y-%m-%dT%H:%M') if job and job.last_response_date else '' }}">
+                    </div>
+
+                    <!-- Interview Date -->
+                    <div class="mb-3">
+                        <label for="interview_date" class="form-label">Interview Date</label>
+                        <input type="datetime-local" 
+                               class="form-control"
+                               name="interview_date" 
+                               id="interview_date"
+                               value="{{ job.interview_date.strftime('%Y-%m-%dT%H:%M') if job and job.interview_date else '' }}">
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Notes</label>
+                        <textarea class="form-control"
+                                  name="notes" 
+                                  id="notes"
+                                  rows="3">{{ job.notes if job else '' }}</textarea>
+                    </div>
+                </div>
             </div>
-            
-            <!-- Company -->
-            <div class="mb-3">
-                <label for="company" class="form-label">Company</label>
-                <input type="text" 
-                       class="form-control"
-                       name="company" 
-                       id="company"
-                       value="{{ job.company if job else '' }}"
-                       required>
-            </div>
-            
-            <!-- Description -->
-            <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
-                <textarea class="form-control"
-                          name="description" 
-                          id="description"
-                          rows="3">{{ job.description if job else '' }}</textarea>
-            </div>
-            
-            <!-- Status -->
-            <div class="mb-3">
-                <label for="status" class="form-label">Status</label>
-                <select class="form-select"
-                        name="status" 
-                        id="status"
-                        required>
-                    <option value="applied" {% if job and job.status == 'applied' %}selected{% endif %}>Applied</option>
-                    <option value="interviewing" {% if job and job.status == 'interviewing' %}selected{% endif %}>Interviewing</option>
-                    <option value="offered" {% if job and job.status == 'offered' %}selected{% endif %}>Offered</option>
-                    <option value="rejected" {% if job and job.status == 'rejected' %}selected{% endif %}>Rejected</option>
-                </select>
-            </div>
-            
-            <!-- Application Date -->
-            <div class="mb-3">
-                <label for="application_date" class="form-label">Application Date</label>
-                <input type="date" 
-                       class="form-control"
-                       name="application_date" 
-                       id="application_date"
-                       value="{{ job.application_date.strftime('%Y-%m-%d') if job and job.application_date else '' }}"
-                       required>
-            </div>
-            
-            <!-- Form actions -->
-            <div class="d-flex justify-content-end gap-2">
+
+            <!-- Submit buttons -->
+            <div class="d-flex justify-content-between mt-4">
                 <button type="button" 
-                        class="btn btn-outline-secondary"
-                        onclick="this.closest('.card').remove()">
+                        class="btn btn-outline-secondary" 
+                        onclick="closeJobForm()">
                     Cancel
                 </button>
-                <button type="submit" class="btn btn-primary">
-                    {{ 'Update' if job else 'Create' }} Job
+                <button type="submit" 
+                        class="btn btn-primary"
+                        hx-indicator="#loading">
+                    {% if job %}Update{% else %}Register{% endif %} Job
+                    <div id="loading" class="htmx-indicator">
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    </div>
                 </button>
             </div>
-            
-            {% if job %}
-            <input type="hidden" name="id" value="{{ job.id }}">
-            {% endif %}
         </form>
     </div>
 </div>
