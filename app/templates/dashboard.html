@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}CareerDock - Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/dashboard.css">
+{% endblock %}
+
+{% block content %}
+<h1>Dashboard</h1>
+<p>Welcome to your CareerDock dashboard, {{ user_name or 'User' }}!</p>
+
+<div class="dashboard-cards">
+    <div class="card">
+        <h2>Job Applications</h2>
+        <p>Track and manage your job applications</p>
+        <a href="/applications" class="btn">View Applications</a>
+    </div>
+    
+    <div class="card">
+        <h2>Resume Builder</h2>
+        <p>Create and customize your resume</p>
+        <a href="/resume" class="btn">Build Resume</a>
+    </div>
+    
+    <div class="card">
+        <h2>Interview Prep</h2>
+        <p>Prepare for interviews with AI assistance</p>
+        <a href="/interviews" class="btn">Practice Interviews</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Check if user is authenticated
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+        window.location.href = '/';
+    }
+</script>
+{% endblock %}

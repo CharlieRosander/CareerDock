@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}CareerDock - Login{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/auth.css">
+{% endblock %}
+
+{% block content %}
+<h1>Welcome to CareerDock</h1>
+<p>CareerDock helps you manage your job search process efficiently with AI assistance.</p>
+
+{% if not user_id %}
+    <a href="/api/v1/auth/google" class="btn">Login with Google</a>
+{% endif %}
+
+{% if token and user_id %}
+<div id="userInfo" class="user-info" style="display: block;">
+    <h2>You are logged in!</h2>
+    <p>Your access token:</p>
+    <pre>{{ token }}</pre>
+    <p>Your user ID:</p>
+    <pre>{{ user_id }}</pre>
+    
+    <a href="/dashboard" class="btn">Go to Dashboard</a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if token and user_id %}
+<script>
+    // Store token in localStorage for future use
+    localStorage.setItem('accessToken', '{{ token }}');
+    localStorage.setItem('userId', '{{ user_id }}');
+    
+    // Clean URL after storing token
+    if (window.location.search) {
+        window.history.replaceState({}, document.title, "/");
+    }
+</script>
+{% endif %}
+{% endblock %}
