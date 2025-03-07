@@ -19,6 +19,12 @@ async def read_users_me(current_user: User = Depends(get_current_user)):
     """
     Get current user.
     """
+    if current_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     return current_user
 
 @router.get("/", response_model=List[User])

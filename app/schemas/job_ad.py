@@ -6,7 +6,7 @@ from datetime import datetime
 class JobAdBase(BaseModel):
     title: str
     company: str
-    location: str
+    location: Optional[str] = None
     description: Optional[str] = None
     job_url: Optional[str] = None
     category: Optional[str] = None

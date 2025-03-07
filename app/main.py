@@ -10,6 +10,7 @@ import os
 from app.api.v1 import auth, users
 from app.core.db import get_db
 from app.core.auth import get_current_user
+from app.models.user import User
 
 app = FastAPI(title="CareerDock")
 
@@ -33,6 +34,16 @@ app.include_router(auth.router, prefix="/api/v1/auth", tags=["Auth"])
 app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
 # app.include_router(ai.router, prefix="/api/v1/ai", tags=["AI"])
 # app.include_router(email.router, prefix="/api/v1/email", tags=["Email"])
+
+
+@app.middleware("http")
+async def add_current_user_to_template(request: Request, call_next):
+    response = await call_next(request)
+    if hasattr(request.state, "user"):
+        templates.env.globals["current_user"] = request.state.user
+    else:
+        templates.env.globals["current_user"] = None
+    return response
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -86,6 +97,7 @@ async def dashboard(request: Request, token: str = None, db: Session = Depends(g
     )
 
 
+### Google OAuth ###
 @app.get("/auth/callback")
 async def auth_callback(token: str = None, user_id: str = None):
     """
@@ -102,3 +114,22 @@ async def api_info():
     API information
     """
     return {"message": "Welcome to CareerDock API"}
+
+
+### Job registry ###
+@app.get("/job_registry", response_class=HTMLResponse)
+async def job_registry(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Serve the job registry page
+    """
+    return templates.TemplateResponse(
+        "job_registry.html",
+        {
+            "request": request,
+            "user": current_user,
+        },
+    )
