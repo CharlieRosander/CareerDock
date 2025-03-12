@@ -85,7 +85,7 @@ async def login_google():
 
 
 @router.get("/callback")
-async def google_callback(request: Request, db: Session = Depends(get_db)):
+async def google_callback(request: Request, response: Response, db: Session = Depends(get_db)):
     """
     Google OAuth callback
     """
@@ -127,11 +127,29 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
         access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         token = create_access_token(user.id, expires_delta=access_token_expires)
 
-        # Redirect to frontend with token
-        return RedirectResponse(url=f"/?token={token}&user_id={user.id}")
+        # Skapa en redirect-respons
+        redirect_response = RedirectResponse(url="/dashboard")
+        
+        # Sätt token i en HttpOnly cookie på redirect-responsen
+        redirect_response.set_cookie(
+            key="access_token",
+            value=token,
+            httponly=True,
+            max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+            expires=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+            samesite="lax",
+            secure=settings.COOKIE_SECURE,  # Använd konfigurationsvärde för säker cookie
+            path="/",  # Säkerställer att cookien skickas med alla förfrågningar
+        )
+
+        # Returnera redirect-responsen
+        return redirect_response
 
     except Exception as e:
+        # Logga felet men visa inte detaljerad information i produktionsmiljö
+        import logging
+        logging.error(f"Error in OAuth callback: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error in OAuth callback: {str(e)}",
+            detail="Authentication error occurred",
         )

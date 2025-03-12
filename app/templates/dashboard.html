@@ -33,10 +33,6 @@
 
 {% block scripts %}
 <script>
-    // Check if user is authenticated
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
-        window.location.href = '/';
-    }
+    console.log("Dashboard loaded successfully");
 </script>
 {% endblock %}

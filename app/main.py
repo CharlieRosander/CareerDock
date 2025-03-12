@@ -49,63 +49,66 @@ async def add_current_user_to_template(request: Request, call_next):
 @app.get("/", response_class=HTMLResponse)
 async def root(
     request: Request,
-    token: str = None,
-    user_id: str = None,
     db: Session = Depends(get_db),
 ):
     """
-    Serve the login page with Jinja2 templates
+    Serve the login page with Jinja2 templates or redirect to dashboard if already logged in
     """
-    user = None
-    if token:
-        user = await get_current_user(db, token)
+    # Check if user is already authenticated via cookie
+    try:
+        # Use oauth2_scheme directly to get token
+        token = request.cookies.get("access_token")
+        
+        if token:
+            # Use the same logic as in get_current_user but without Depends
+            from app.core.security import decode_access_token
+            from app.services.user_service import get_user_by_id
+            from uuid import UUID
 
+            try:
+                user_id = decode_access_token(token)
+                if user_id:
+                    user = get_user_by_id(db, UUID(user_id))
+                    if user:
+                        # User is authenticated, redirect to dashboard
+                        return RedirectResponse(url="/dashboard")
+            except Exception:
+                # Continue to login page on any error
+                pass
+    except Exception:
+        # Continue to login page on any error
+        pass
+
+    # User is not authenticated, show login page
     return templates.TemplateResponse(
         "login.html",
-        {"request": request, "token": token, "user_id": user_id, "user": user},
+        {"request": request},
     )
 
 
 @app.get("/dashboard", response_class=HTMLResponse)
-async def dashboard(request: Request, token: str = None, db: Session = Depends(get_db)):
+async def dashboard(
+    request: Request, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """
     Serve the dashboard page
     """
-    # First check if token is provided as query parameter
-    if not token:
-        # Then check cookies or authorization header
-        token = request.cookies.get("access_token") or request.headers.get(
-            "Authorization"
-        )
-
-        if token and token.startswith("Bearer "):
-            token = token.replace("Bearer ", "")
-
-    user = await get_current_user(db, token)
-
-    if not user:
+    # Om användaren inte är autentiserad, omdirigera till inloggningssidan
+    if not current_user:
         return RedirectResponse(url="/")
-
+    
+    # Användaren är autentiserad, visa dashboard
     return templates.TemplateResponse(
         "dashboard.html",
         {
             "request": request,
-            "user": user,
-            "user_id": user.id,
-            "user_name": user.full_name,
+            "user": current_user,
+            "user_id": current_user.id,
+            "user_name": current_user.full_name,
         },
     )
-
-
-### Google OAuth ###
-@app.get("/auth/callback")
-async def auth_callback(token: str = None, user_id: str = None):
-    """
-    Handle the callback from Google OAuth
-    """
-    if token and user_id:
-        return RedirectResponse(url=f"/?token={token}&user_id={user_id}")
-    return RedirectResponse(url="/")
 
 
 @app.get("/api")
@@ -120,12 +123,17 @@ async def api_info():
 @app.get("/job_registry", response_class=HTMLResponse)
 async def job_registry(
     request: Request,
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """
     Serve the job registry page
     """
+    # Om användaren inte är autentiserad, omdirigera till inloggningssidan
+    if not current_user:
+        return RedirectResponse(url="/")
+    
+    # Användaren är autentiserad, visa job_registry
     return templates.TemplateResponse(
         "job_registry.html",
         {

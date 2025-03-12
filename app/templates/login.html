@@ -27,17 +27,13 @@
 {% endif %}
 {% endblock %}
 
-{% block scripts %}
-{% if token and user_id %}
+<!-- {% block scripts %}
 <script>
-    // Store token in localStorage for future use
-    localStorage.setItem('accessToken', '{{ token }}');
-    localStorage.setItem('userId', '{{ user_id }}');
+    console.log("Login page loaded");
     
-    // Clean URL after storing token
+    // Clean URL after authentication process
     if (window.location.search) {
         window.history.replaceState({}, document.title, "/");
     }
 </script>
-{% endif %}
-{% endblock %}
+{% endblock %} -->

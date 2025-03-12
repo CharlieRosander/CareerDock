@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str = os.getenv("SECRET_KEY", "your-secret-key-here")
     JWT_SECRET_KEY: Optional[str] = os.getenv("JWT_SECRET_KEY")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 2
+    COOKIE_SECURE: bool = os.getenv("COOKIE_SECURE").lower()
 
     # Google OAuth settings
     GOOGLE_CLIENT_ID: Optional[str] = os.getenv("GOOGLE_CLIENT_ID")
