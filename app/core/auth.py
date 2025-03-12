@@ -24,10 +24,9 @@ class OAuth2PasswordBearerWithCookie(OAuth2):
         if authorization and authorization.startswith("Bearer "):
             return authorization.replace("Bearer ", "")
         
-        # Try to get token from cookie - now expecting token directly without Bearer prefix
+        # Try to get token from cookie - expecting token directly without Bearer prefix
         cookie_authorization = request.cookies.get("access_token")
         if cookie_authorization:
-            # Return the token as is, no need to remove Bearer prefix
             return cookie_authorization
         
         # No token found
@@ -54,10 +53,9 @@ async def get_current_user(
     """
     Get the current user from the JWT token
     """
-    # Använd strukturerad loggning istället för print-satser
     logger = logging.getLogger(__name__)
     
-    # Om ingen token från oauth2_scheme, försök hämta direkt från cookies
+    # If no token from oauth2_scheme, try to get directly from cookies
     if not token:
         logger.debug("No token from oauth2_scheme, trying cookies directly")
         token = request.cookies.get("access_token")
@@ -73,7 +71,7 @@ async def get_current_user(
     )
     
     try:
-        # Försök dekoda token för att få användar-ID
+        # Try to decode token to get user ID
         user_id = decode_access_token(token)
         if user_id is None:
             logger.warning("No user_id in token")
@@ -82,14 +80,14 @@ async def get_current_user(
         logger.error(f"Exception decoding token: {str(e)}")
         raise credentials_exception
 
-    # Hämta användare från databasen
+    # Get user from database
     try:
         user = get_user_by_id(db, UUID(user_id))
         if user is None:
             logger.warning(f"No user found with id {user_id}")
             raise credentials_exception
         
-        # Spara användaren i request.state för enkel åtkomst i andra delar av appen
+        # Store user in request.state for easy access in other parts of the app
         request.state.user = user
         return user
     except ValueError as e:

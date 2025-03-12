@@ -5,11 +5,14 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 import os
+from uuid import UUID
 
 # Import routers and dependencies
 from app.api.v1 import auth, users
 from app.core.db import get_db
 from app.core.auth import get_current_user
+from app.core.security import decode_access_token
+from app.services.user_service import get_user_by_id
 from app.models.user import User
 
 app = FastAPI(title="CareerDock")
@@ -32,8 +35,6 @@ templates = Jinja2Templates(directory="app/templates")
 # Register API routers
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Auth"])
 app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
-# app.include_router(ai.router, prefix="/api/v1/ai", tags=["AI"])
-# app.include_router(email.router, prefix="/api/v1/email", tags=["Email"])
 
 
 @app.middleware("http")
@@ -56,15 +57,9 @@ async def root(
     """
     # Check if user is already authenticated via cookie
     try:
-        # Use oauth2_scheme directly to get token
         token = request.cookies.get("access_token")
         
         if token:
-            # Use the same logic as in get_current_user but without Depends
-            from app.core.security import decode_access_token
-            from app.services.user_service import get_user_by_id
-            from uuid import UUID
-
             try:
                 user_id = decode_access_token(token)
                 if user_id:
@@ -95,11 +90,11 @@ async def dashboard(
     """
     Serve the dashboard page
     """
-    # Om användaren inte är autentiserad, omdirigera till inloggningssidan
+    # If user is not authenticated, redirect to login page
     if not current_user:
         return RedirectResponse(url="/")
     
-    # Användaren är autentiserad, visa dashboard
+    # User is authenticated, show dashboard
     return templates.TemplateResponse(
         "dashboard.html",
         {
@@ -119,7 +114,6 @@ async def api_info():
     return {"message": "Welcome to CareerDock API"}
 
 
-### Job registry ###
 @app.get("/job_registry", response_class=HTMLResponse)
 async def job_registry(
     request: Request,
@@ -129,11 +123,11 @@ async def job_registry(
     """
     Serve the job registry page
     """
-    # Om användaren inte är autentiserad, omdirigera till inloggningssidan
+    # If user is not authenticated, redirect to login page
     if not current_user:
         return RedirectResponse(url="/")
     
-    # Användaren är autentiserad, visa job_registry
+    # User is authenticated, show job registry
     return templates.TemplateResponse(
         "job_registry.html",
         {

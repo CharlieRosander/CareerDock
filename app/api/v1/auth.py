@@ -1,8 +1,7 @@
 from datetime import timedelta
-from typing import Any, Dict, Optional
-import httpx
+from typing import Optional
 import os
-import json
+import logging
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
@@ -16,7 +15,6 @@ from app.core.db import get_db
 from app.core.config import settings
 from app.core.security import create_access_token
 from app.services.user_service import (
-    get_user_by_email,
     get_user_by_google_id,
     create_user,
 )
@@ -44,14 +42,13 @@ def create_flow():
     if not client_secret_path.exists():
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Client secret file not found",
+            detail="Client secret file not found",
         )
 
-    # Create flow instance to manage the OAuth 2.0 Authorization Grant Flow
     flow = Flow.from_client_secrets_file(
         client_secret_path,
         scopes=SCOPES,
-        redirect_uri=f"http://localhost:8000/api/v1/auth/callback",
+        redirect_uri=settings.GOOGLE_REDIRECT_URI,
     )
 
     return flow
@@ -63,24 +60,18 @@ async def login_google():
     Redirect to Google OAuth login
     """
     try:
-        # Create flow
         flow = create_flow()
-
-        # Generate authorization URL
         authorization_url, state = flow.authorization_url(
             access_type="offline",
             include_granted_scopes="true",
         )
-
-        # Store state for CSRF protection
-        # In a real app, you'd store this in a session or cookie
-        # For simplicity, we'll use a query parameter
         return RedirectResponse(url=authorization_url)
 
     except Exception as e:
+        logging.error(f"Error creating authorization URL: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error creating authorization URL: {str(e)}",
+            detail="Error creating authorization URL",
         )
 
 
@@ -89,7 +80,6 @@ async def google_callback(request: Request, response: Response, db: Session = De
     """
     Google OAuth callback
     """
-    # Get authorization code from query parameters
     code = request.query_params.get("code")
     if not code:
         raise HTTPException(
@@ -98,13 +88,8 @@ async def google_callback(request: Request, response: Response, db: Session = De
         )
 
     try:
-        # Create flow
         flow = create_flow()
-
-        # Exchange authorization code for credentials
         flow.fetch_token(code=code)
-
-        # Get credentials
         credentials = flow.credentials
 
         # Get user info from Google
@@ -127,10 +112,9 @@ async def google_callback(request: Request, response: Response, db: Session = De
         access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         token = create_access_token(user.id, expires_delta=access_token_expires)
 
-        # Skapa en redirect-respons
+        # Skapa redirect och sätt token i cookie
         redirect_response = RedirectResponse(url="/dashboard")
         
-        # Sätt token i en HttpOnly cookie på redirect-responsen
         redirect_response.set_cookie(
             key="access_token",
             value=token,
@@ -138,16 +122,13 @@ async def google_callback(request: Request, response: Response, db: Session = De
             max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
             expires=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
             samesite="lax",
-            secure=settings.COOKIE_SECURE,  # Använd konfigurationsvärde för säker cookie
-            path="/",  # Säkerställer att cookien skickas med alla förfrågningar
+            secure=settings.COOKIE_SECURE,
+            path="/",
         )
 
-        # Returnera redirect-responsen
         return redirect_response
 
     except Exception as e:
-        # Logga felet men visa inte detaljerad information i produktionsmiljö
-        import logging
         logging.error(f"Error in OAuth callback: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
