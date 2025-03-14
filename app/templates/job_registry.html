@@ -26,7 +26,7 @@
     {% endif %}
 </div>
 
-{% if current_user.is_authenticated %}
+{% if user %}
 <div class="create-job-ad">
     <form hx-post="/api/v1/job_ads/create_form" hx-target="#form-messages" hx-swap="innerHTML"
         hx-indicator="#loading-indicator">
@@ -53,7 +53,7 @@
 </div>
 {% else %}
 <div class="alert alert-warning">
-    Please <a href="/login">log in</a> to post job advertisements.
+    Please <a href="/api/v1/auth/google">log in</a> to post job advertisements.
 </div>
 {% endif %}
 {% endblock %}

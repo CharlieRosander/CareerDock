@@ -14,25 +14,59 @@
     <div class="card">
         <h2>Job Applications</h2>
         <p>Track and manage your job applications</p>
-        <a href="/applications" class="btn">View Applications</a>
+        <button class="btn" 
+                hx-get="/api/v1/applications/summary" 
+                hx-target="#application-data" 
+                hx-trigger="click">
+            View Applications
+        </button>
     </div>
     
     <div class="card">
         <h2>Resume Builder</h2>
         <p>Create and customize your resume</p>
-        <a href="/resume" class="btn">Build Resume</a>
+        <button class="btn" 
+                hx-get="/api/v1/resume/templates" 
+                hx-target="#resume-templates" 
+                hx-trigger="click">
+            Build Resume
+        </button>
     </div>
     
     <div class="card">
         <h2>Interview Prep</h2>
         <p>Prepare for interviews with AI assistance</p>
-        <a href="/interviews" class="btn">Practice Interviews</a>
+        <button class="btn" 
+                hx-get="/api/v1/interviews/topics" 
+                hx-target="#interview-topics" 
+                hx-trigger="click">
+            Practice Interviews
+        </button>
+    </div>
+</div>
+
+<!-- HTMX target containers -->
+<div id="application-data" class="mt-4"></div>
+<div id="resume-templates" class="mt-4"></div>
+<div id="interview-topics" class="mt-4"></div>
+
+<!-- Loading indicator -->
+<div class="htmx-indicator">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
     </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-    console.log("Dashboard loaded successfully");
+    // HTMX events
+    document.body.addEventListener('htmx:afterSwap', function(event) {
+        console.log("Content loaded via HTMX:", event.detail.target.id);
+    });
+    
+    document.body.addEventListener('htmx:beforeRequest', function(event) {
+        console.log("HTMX request starting for:", event.detail.target.id);
+    });
 </script>
 {% endblock %}

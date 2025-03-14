@@ -134,3 +134,17 @@ async def google_callback(request: Request, response: Response, db: Session = De
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Authentication error occurred",
         )
+
+
+@router.get("/logout")
+async def logout():
+    """
+    Logout user by clearing the access token cookie
+    """
+    response = RedirectResponse(url="/")
+    response.delete_cookie(key="access_token", path="/")
+    
+    # Add debug logging
+    logging.debug("User logged out, access_token cookie cleared")
+    
+    return response

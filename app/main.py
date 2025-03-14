@@ -58,7 +58,7 @@ async def root(
     # Check if user is already authenticated via cookie
     try:
         token = request.cookies.get("access_token")
-        
+
         if token:
             try:
                 user_id = decode_access_token(token)
@@ -83,9 +83,9 @@ async def root(
 
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard(
-    request: Request, 
+    request: Request,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     """
     Serve the dashboard page
@@ -93,7 +93,7 @@ async def dashboard(
     # If user is not authenticated, redirect to login page
     if not current_user:
         return RedirectResponse(url="/")
-    
+
     # User is authenticated, show dashboard
     return templates.TemplateResponse(
         "dashboard.html",
@@ -118,7 +118,7 @@ async def api_info():
 async def job_registry(
     request: Request,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     """
     Serve the job registry page
@@ -126,7 +126,7 @@ async def job_registry(
     # If user is not authenticated, redirect to login page
     if not current_user:
         return RedirectResponse(url="/")
-    
+
     # User is authenticated, show job registry
     return templates.TemplateResponse(
         "job_registry.html",

@@ -27,6 +27,7 @@
 .navbar-menu {
     display: flex;
     gap: 1.5rem;
+    align-items: center;
 }
 
 .navbar-item {
@@ -37,4 +38,10 @@
 
 .navbar-item:hover {
     color: #4285F4;
+}
+
+/* Dropdown styles */
+.dropdown {
+    position: relative;
+    display: inline-block;
 }
