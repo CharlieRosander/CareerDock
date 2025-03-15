@@ -6,9 +6,11 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 import os
 from uuid import UUID
+from typing import Optional
+from fastapi import status
 
 # Import routers and dependencies
-from app.api.v1 import auth, users
+from app.api.v1 import auth, users, job_ads
 from app.core.db import get_db
 from app.core.auth import get_current_user
 from app.core.security import decode_access_token
@@ -35,6 +37,7 @@ templates = Jinja2Templates(directory="app/templates")
 # Register API routers
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Auth"])
 app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
+app.include_router(job_ads.router, prefix="/api/v1/job_ads", tags=["Job Ads"])
 
 
 @app.middleware("http")
@@ -45,6 +48,14 @@ async def add_current_user_to_template(request: Request, call_next):
     else:
         templates.env.globals["current_user"] = None
     return response
+
+
+@app.get("/api")
+async def api_info():
+    """
+    API information
+    """
+    return {"message": "Welcome to CareerDock API"}
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -106,32 +117,14 @@ async def dashboard(
     )
 
 
-@app.get("/api")
-async def api_info():
-    """
-    API information
-    """
-    return {"message": "Welcome to CareerDock API"}
-
-
-@app.get("/job_registry", response_class=HTMLResponse)
+@app.get("/job-registry", response_class=HTMLResponse)
 async def job_registry(
     request: Request,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: Optional[User] = Depends(get_current_user),
 ):
     """
     Serve the job registry page
     """
-    # If user is not authenticated, redirect to login page
-    if not current_user:
-        return RedirectResponse(url="/")
-
-    # User is authenticated, show job registry
     return templates.TemplateResponse(
-        "job_registry.html",
-        {
-            "request": request,
-            "user": current_user,
-        },
+        "job_registry.html", {"request": request, "user": current_user}
     )
