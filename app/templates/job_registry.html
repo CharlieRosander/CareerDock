@@ -1,157 +1,104 @@
 {% extends "base.html" %}
 
-{% block title %}CareerDock - Job Registry{% endblock %}
+{% block title %}Job Registry - CareerDock{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="/static/css/job_registry.css">
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/job_registry.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', path='css/jobs.css') }}">
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1>Job Registry</h1>
-    <p>Use this page to post and manage job advertisements.</p>
-
-    <div id="form-messages">
-        {% if form_errors %}
-        <div class="alert alert-danger">
-            {% for error in form_errors %}
-            <p>{{ error }}</p>
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        {% if success_message %}
-        <div class="alert alert-success">
-            {{ success_message }}
-        </div>
-        {% endif %}
+<div class="row">
+    <div class="col-md-12 d-flex justify-content-between align-items-center mb-4">
+        <h1>Job Registry</h1>
+        <button class="btn btn-primary" id="addJobBtn" hx-get="/api/v1/job_ads/get_job_ad_create_form"
+            hx-target="#editJobModal .modal-content" data-bs-toggle="modal" data-bs-target="#editJobModal">
+            <i class="bi bi-plus-circle"></i> Add New Job
+        </button>
     </div>
+</div>
 
-    {% if user %}
-    <!-- Job Creation Form -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h2>Create New Job Advertisement</h2>
-        </div>
-        <div class="card-body">
-            <form hx-post="/api/v1/job_ads/create_form" hx-target="#form-messages" hx-swap="innerHTML"
-                hx-indicator="#loading-indicator">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+<!-- Alert container for HTMX responses -->
+<div id="alertContainer"></div>
 
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group mb-3">
-                            <label for="title">Job Title:</label>
-                            <input type="text" id="title" name="title" class="form-control" required>
-                        </div>
+<div class="row">
+    <div class="col-md-12">
+        <!-- Search form -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form id="jobSearchForm" class="d-flex">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search jobs..." name="search_term"
+                            hx-get="/api/v1/job_ads/get_job_listings_html" hx-trigger="keyup changed delay:500ms, search"
+                            hx-target="#job-listings" hx-indicator="#searchSpinner">
+                        <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                            <i class="bi bi-search"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary clear-search" type="button">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
                     </div>
-                    <div class="col-md-6">
-                        <div class="form-group mb-3">
-                            <label for="location">Location:</label>
-                            <input type="text" id="location" name="location" class="form-control" required>
-                        </div>
-                    </div>
+                </form>
+                <div id="searchSpinner" class="htmx-indicator spinner-border spinner-border-sm text-primary mt-2"
+                    role="status">
+                    <span class="visually-hidden">Loading...</span>
                 </div>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group mb-3">
-                            <label for="category">Category:</label>
-                            <input type="text" id="category" name="category" class="form-control">
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group mb-3">
-                            <label for="job_url">Job URL:</label>
-                            <input type="url" id="job_url" name="job_url" class="form-control">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group mb-3">
-                    <label for="description">Description:</label>
-                    <textarea id="description" name="description" class="form-control" rows="4"></textarea>
-                </div>
-
-                <button type="submit" class="btn btn-primary">
-                    <span id="loading-indicator" class="htmx-indicator">
-                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        Registering...
-                    </span>
-                    <span class="htmx-request-hidden">Register Job</span>
-                </button>
-            </form>
+            </div>
         </div>
-    </div>
 
-    <!-- Job Search -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h2>Search Jobs</h2>
-        </div>
-        <div class="card-body">
-            <form hx-get="/api/v1/job_ads/search_job_ads_html" hx-target="#job-listings" hx-swap="innerHTML"
-                hx-trigger="submit, change delay:500ms from:#search-term">
-                <div class="input-group mb-3">
-                    <input type="text" id="search-term" name="search_term" class="form-control"
-                        placeholder="Search by title, company, or keywords">
-                    <button class="btn btn-outline-secondary" type="submit">Search</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Job Listings -->
-    <div class="card">
-        <div class="card-header">
-            <h2>Your Job Listings</h2>
-        </div>
-        <div class="card-body">
-            <div id="job-listings" hx-get="/api/v1/job_ads/get_job_ads_html" hx-trigger="load">
-                <div class="d-flex justify-content-center">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
+        <!-- Job listings container -->
+        <div id="job-listings" hx-get="/api/v1/job_ads/get_job_listings_html" hx-trigger="load">
+            <!-- Job listings will be loaded here via HTMX -->
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Job Edit Modal -->
-    <div class="modal fade" id="editJobModal" tabindex="-1" aria-labelledby="editJobModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editJobModalLabel">Edit Job</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" id="edit-job-form-container">
-                    <!-- Form will be loaded here via HTMX -->
-                </div>
-            </div>
+<!-- Edit Job Modal -->
+<div class="modal fade job-modal" id="editJobModal" tabindex="-1" aria-labelledby="editJobModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <!-- Modal content will be loaded here via HTMX -->
         </div>
     </div>
-
-    {% else %}
-    <div class="alert alert-warning">
-        Please <a href="/api/v1/auth/google">log in</a> to post job advertisements.
-    </div>
-    {% endif %}
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-    // Initialize tooltips
-    document.addEventListener('DOMContentLoaded', function () {
-        // Refresh job listings when a job is created or deleted
-        document.body.addEventListener('jobCreated', function () {
-            document.getElementById('job-listings').setAttribute('hx-get', '/api/v1/job_ads/get_job_ads_html');
-            htmx.trigger('#job-listings', 'load');
-        });
+    // Initialize search button functionality
+    document.getElementById('searchButton').addEventListener('click', function () {
+        htmx.trigger('#jobSearchForm input[name="search_term"]', 'search');
+    });
 
-        document.body.addEventListener('jobDeleted', function () {
-            htmx.trigger('#job-listings', 'load');
+    // Delegera klick-händelser för edit-knappar (fungerar även för dynamiskt tillagda element)
+    document.addEventListener('click', function(event) {
+        if (event.target.closest('.edit-job-btn')) {
+            // Visa modalen manuellt när en edit-knapp klickas
+            const modal = document.getElementById('editJobModal');
+            const bsModal = new bootstrap.Modal(modal);
+            bsModal.show();
+        }
+    });
+
+    // Initialize Bootstrap modals
+    document.addEventListener('DOMContentLoaded', function () {
+        document.body.addEventListener('htmx:afterSwap', function (event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                const modalInstance = bootstrap.Modal.getInstance(modal);
+                if (!modalInstance) {
+                    new bootstrap.Modal(modal);
+                }
+            });
+            
+            // Återinitialisera HTMX för nya element
+            htmx.process(document.body);
         });
     });
 </script>

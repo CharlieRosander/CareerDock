@@ -1,0 +1,47 @@
+{% if alert_type and message %}
+<div class="alert alert-{{ alert_type }}" role="alert">
+    {{ message }}
+</div>
+
+{% if include_refresh_script %}
+<script>
+    // Stäng modalen om den är öppen
+    var modal = document.getElementById('editJobModal');
+    if (modal) {
+        var modalInstance = bootstrap.Modal.getInstance(modal);
+        if (modalInstance) {
+            modalInstance.hide();
+        }
+    }
+    
+    // Uppdatera jobblistan direkt med AJAX-anrop
+    fetch('{{ refresh_url }}')
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('{{ target_element }}').innerHTML = html;
+            
+            // Återinitialisera HTMX för nya element
+            htmx.process(document.getElementById('{{ target_element }}'));
+            
+            // Initialisera Bootstrap modaler för nya element
+            const newModals = document.querySelectorAll('.modal');
+            newModals.forEach(modal => {
+                const modalInstance = bootstrap.Modal.getInstance(modal);
+                if (!modalInstance) {
+                    new bootstrap.Modal(modal);
+                }
+            });
+            
+            // Lägg till klick-händelser för edit-knappar
+            document.querySelectorAll('.edit-job-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const modal = document.getElementById('editJobModal');
+                    const bsModal = new bootstrap.Modal(modal);
+                    bsModal.show();
+                });
+            });
+        })
+        .catch(error => console.error('Error refreshing job listings:', error));
+</script>
+{% endif %}
+{% endif %}

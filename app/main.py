@@ -42,11 +42,27 @@ app.include_router(job_ads.router, prefix="/api/v1/job_ads", tags=["Job Ads"])
 
 @app.middleware("http")
 async def add_current_user_to_template(request: Request, call_next):
-    response = await call_next(request)
-    if hasattr(request.state, "user"):
-        templates.env.globals["current_user"] = request.state.user
+    # Get the current user before processing the request
+    token = request.cookies.get("access_token")
+    if token:
+        try:
+            user_id = decode_access_token(token)
+            if user_id:
+                db = next(get_db())
+                user = get_user_by_id(db, UUID(user_id))
+                if user:
+                    request.state.user = user
+                    templates.env.globals["current_user"] = user
+                else:
+                    templates.env.globals["current_user"] = None
+            else:
+                templates.env.globals["current_user"] = None
+        except Exception:
+            templates.env.globals["current_user"] = None
     else:
         templates.env.globals["current_user"] = None
+    
+    response = await call_next(request)
     return response
 
 

@@ -1,72 +1,38 @@
 {% extends "base.html" %}
 
-{% block title %}CareerDock - Dashboard{% endblock %}
+{% block title %}Dashboard - CareerDock{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="/static/css/dashboard.css">
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/dashboard.css') }}">
 {% endblock %}
 
 {% block content %}
-<h1>Dashboard</h1>
-<p>Welcome to your CareerDock dashboard, {{ user_name or 'User' }}!</p>
-
-<div class="dashboard-cards">
-    <div class="card">
-        <h2>Job Applications</h2>
-        <p>Track and manage your job applications</p>
-        <button class="btn" 
-                hx-get="/api/v1/applications/summary" 
-                hx-target="#application-data" 
-                hx-trigger="click">
-            View Applications
-        </button>
-    </div>
-    
-    <div class="card">
-        <h2>Resume Builder</h2>
-        <p>Create and customize your resume</p>
-        <button class="btn" 
-                hx-get="/api/v1/resume/templates" 
-                hx-target="#resume-templates" 
-                hx-trigger="click">
-            Build Resume
-        </button>
-    </div>
-    
-    <div class="card">
-        <h2>Interview Prep</h2>
-        <p>Prepare for interviews with AI assistance</p>
-        <button class="btn" 
-                hx-get="/api/v1/interviews/topics" 
-                hx-target="#interview-topics" 
-                hx-trigger="click">
-            Practice Interviews
-        </button>
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="mb-4">Welcome, {{ current_user.full_name }}</h1>
+        <p>Welcome to your CareerDock dashboard! Here you can manage your job search process.</p>
     </div>
 </div>
 
-<!-- HTMX target containers -->
-<div id="application-data" class="mt-4"></div>
-<div id="resume-templates" class="mt-4"></div>
-<div id="interview-topics" class="mt-4"></div>
-
-<!-- Loading indicator -->
-<div class="htmx-indicator">
-    <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
+<div class="row mt-4">
+    <div class="col-md-6 mb-4">
+        <div class="card dashboard-card">
+            <div class="card-body">
+                <h5 class="card-title">Job Registry</h5>
+                <p class="card-text">Manage your job advertisements</p>
+                <a href="/job-registry" class="btn btn-primary">Go to Job Registry</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card dashboard-card">
+            <div class="card-body">
+                <h5 class="card-title">Account Settings</h5>
+                <p class="card-text">View and update your account settings</p>
+                <button class="btn btn-primary" disabled>Coming Soon</button>
+            </div>
+        </div>
     </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-    // HTMX events
-    document.body.addEventListener('htmx:afterSwap', function(event) {
-        console.log("Content loaded via HTMX:", event.detail.target.id);
-    });
-    
-    document.body.addEventListener('htmx:beforeRequest', function(event) {
-        console.log("HTMX request starting for:", event.detail.target.id);
-    });
-</script>
 {% endblock %}

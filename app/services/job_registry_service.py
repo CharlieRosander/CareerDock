@@ -127,3 +127,49 @@ def search_job_ads(db: Session, search_term: str, skip: int = 0, limit: int = 10
         (JobAd.keywords.ilike(search_pattern)) |
         (JobAd.description.ilike(search_pattern))
     ).order_by(JobAd.date_posted.desc()).offset(skip).limit(limit).all()
+
+
+def process_job_form_data(form_data: dict) -> dict:
+    """
+    Process form data for job ad creation/update.
+    
+    Args:
+        form_data: Form data from request
+        
+    Returns:
+        Processed job ad data ready for schema creation
+    """
+    job_ad_data = {
+        "title": form_data.get("title"),
+        "company": form_data.get("company"),
+        "location": form_data.get("location"),
+        "description": form_data.get("description"),
+        "job_url": form_data.get("job_url"),
+        "category": form_data.get("category"),
+    }
+    
+    # Handle keywords (convert from comma-separated string to list)
+    keywords = form_data.get("keywords")
+    if keywords:
+        job_ad_data["keywords"] = [k.strip() for k in keywords.split(",") if k.strip()]
+    
+    return job_ad_data
+
+
+def get_job_listings(db: Session, search_term: Optional[str] = None, skip: int = 0, limit: int = 100) -> List[JobAd]:
+    """
+    Get job listings, optionally filtered by search term.
+    
+    Args:
+        db: Database session
+        search_term: Optional search term to filter by
+        skip: Number of records to skip
+        limit: Maximum number of records to return
+        
+    Returns:
+        List of job advertisements
+    """
+    if search_term:
+        return search_job_ads(db=db, search_term=search_term, skip=skip, limit=limit)
+    else:
+        return get_all_job_ads(db=db, skip=skip, limit=limit)

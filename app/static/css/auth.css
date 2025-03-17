@@ -1,15 +1,68 @@
-/* Styles specific to authentication pages */
-.user-info {
-    margin-top: 30px;
-    background-color: #e9f5ff;
-    padding: 20px;
-    border-radius: 6px;
-    display: none;
+/* Authentication styles */
+.login-card {
+    max-width: 500px;
+    margin: 50px auto;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
-.user-info pre {
-    background-color: #f1f1f1;
-    padding: 10px;
-    border-radius: 4px;
-    overflow-x: auto;
+.login-card .card-header {
+    text-align: center;
+    padding: 25px 20px;
+    background-color: #f8f9fa;
+}
+
+.login-card .card-body {
+    padding: 30px;
+}
+
+.login-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.login-btn svg {
+    margin-right: 10px;
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.login-separator {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 20px 0;
+    color: #6c757d;
+}
+
+.login-separator::before,
+.login-separator::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.login-separator::before {
+    margin-right: 10px;
+}
+
+.login-separator::after {
+    margin-left: 10px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .login-card {
+        margin: 20px auto;
+    }
+    
+    .login-card .card-body {
+        padding: 20px;
+    }
 }

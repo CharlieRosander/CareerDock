@@ -112,8 +112,9 @@ async def google_callback(request: Request, response: Response, db: Session = De
         access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         token = create_access_token(user.id, expires_delta=access_token_expires)
 
-        # Skapa redirect och sätt token i cookie
-        redirect_response = RedirectResponse(url="/dashboard")
+        # Create redirect and set token in cookie
+        # Using status_code=303 (See Other) to force a GET request and full page refresh
+        redirect_response = RedirectResponse(url="/dashboard", status_code=303)
         
         redirect_response.set_cookie(
             key="access_token",
@@ -141,7 +142,8 @@ async def logout():
     """
     Logout user by clearing the access token cookie
     """
-    response = RedirectResponse(url="/")
+    # Using status_code=303 (See Other) to force a GET request and full page refresh
+    response = RedirectResponse(url="/", status_code=303)
     response.delete_cookie(key="access_token", path="/")
     
     # Add debug logging

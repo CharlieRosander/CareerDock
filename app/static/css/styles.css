@@ -1,3 +1,34 @@
+/* Main styles for CareerDock */
+
+/* General styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* Card styling */
+.card {
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    padding: 15px 20px;
+}
+
+/* Dashboard specific styles */
+.dashboard-card {
+    transition: transform 0.3s ease;
+    height: 100%;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+}
+
 /* Job registry styles */
 .job-card {
     border: 1px solid #dee2e6;
@@ -82,9 +113,26 @@
     color: #6c757d;
 }
 
-/* Search box styling */
-.search-container {
+/* Alert styling */
+.alert {
+    border-radius: 8px;
     margin-bottom: 20px;
+}
+
+/* Form styling */
+.form-label {
+    font-weight: 500;
+}
+
+/* Modal styling */
+.modal-content {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
 }
 
 /* Responsive adjustments */
